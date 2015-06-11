@@ -8,9 +8,11 @@ GEM
   remote: https://rubygems.org/
   specs:
     excon (0.45.3)
+    rake (10.1.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   influxdb-lineprotocol-writer!
+  rake
