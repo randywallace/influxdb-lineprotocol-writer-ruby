@@ -9,5 +9,8 @@ module InfluxDB
     class FailedLoginError < StandardError
     end
 
+    class NotSupportedError < StandardError
+    end
+
   end
 end
