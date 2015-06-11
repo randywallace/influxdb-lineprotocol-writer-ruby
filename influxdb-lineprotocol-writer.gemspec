@@ -20,6 +20,6 @@ EOF
   s.required_ruby_version = '>= 2.0.0'
   s.homepage    = 'https://github.com/randywallace/influxdb-lineprotocol-writer-ruby'
 
-  #s.add_runtime_dependency
+  s.add_runtime_dependency 'excon', '>= 0.45.3'
   #s.add_development_dependency
 end

@@ -1,1 +1,4 @@
-VERSION = '0.1.0'
+module InfluxDB
+  module LineProtocolWriter
+  end
+end

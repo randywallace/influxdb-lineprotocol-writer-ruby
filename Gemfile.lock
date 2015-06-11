@@ -2,9 +2,12 @@ PATH
   remote: .
   specs:
     influxdb-lineprotocol-writer (0.1.0)
+      excon (>= 0.45.3)
 
 GEM
+  remote: https://rubygems.org/
   specs:
+    excon (0.45.3)
 
 PLATFORMS
   ruby
