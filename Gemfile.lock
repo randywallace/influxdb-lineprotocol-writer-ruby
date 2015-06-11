@@ -1,0 +1,13 @@
+PATH
+  remote: .
+  specs:
+    influxdb-lineprotocol-writer (0.1.0)
+
+GEM
+  specs:
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  influxdb-lineprotocol-writer!
