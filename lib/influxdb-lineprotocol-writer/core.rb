@@ -2,20 +2,62 @@ require 'excon'
 
 module InfluxDB
   module LineProtocolWriter
+    module Util
+      def build_metric(measurement, tags, fields, precision='ms', timestamp=nil)
+        raise OptionError, 'measurement does not implement to_s' unless measurement.respond_to? :to_s
+        raise OptionError, 'fields does not implement to_h' unless fields.respond_to? :to_h
+        raise OptionError, 'precision does not implement to_s' unless precision.respond_to? :to_s
+        timestamp = get_now_timestamp(precision.to_s) unless timestamp
+        working = measurement.to_s
+        if tags.respond_to?(:to_h) && !tags.to_h.empty?
+          working += ',' + tags.sort.map{|k,v|"#{k.to_s}=#{v.to_s}"}.join(",")
+        end
+        working += ' '
+        working += fields.sort.map{|k,v|"#{k.to_s}=#{if v.is_a?(String);'"'+v+'"';else;v;end}"}.join(",")
+        working += " #{timestamp}"
+      end
+      def check_precision(val)
+        if %[n u ms s m h].include?(val.to_s)
+          true
+        else
+          false
+        end
+      end
+      def get_now_timestamp precision
+        check_precision precision
+        case precision
+        when 'n'
+          raise NotSupportedError, 'Nanosecond resolution not currently supported.  Pass timestamp in manually'
+        when 'u'
+          raise NotSupportedError, 'Microsecond resolution not currently supported.  Pass timestamp in manually'
+        when 'ms'
+          ( Time.now.to_f * 1000 ).to_i
+        when 's'
+          Time.now.to_i
+        when 'm'
+          ( Time.now.to_i / 60 ).to_i
+        when 'h'
+          ( Time.now.to_i / 3600 ).to_i
+        end
+      end
+    end
     class Core
+      include Util
+
       attr_reader :host, :port, :user, :pass, :ssl, :db, :precision, :consistency, :retentionPolicy, :debug
+
       def initialize(opts={})
         # set the defaults
-        opts      = {host: 'localhost',
-                     port: '8086',
-                     user: 'root',
-                     pass: 'root',
-                     ssl: false,
-                     db: 'influxdb',
-                     precision: 'ms',
-                     consistency: 'one',
-                     retentionPolicy: 'default',
-                     debug: false}.merge(opts)
+        opts = {host: 'localhost',
+                port: '8086',
+                user: 'root',
+                pass: 'root',
+                ssl: false,
+                db: 'influxdb',
+                precision: 'ms',
+                consistency: 'one',
+                retentionPolicy: 'default',
+                debug: false}.merge(opts)
         self.host = opts[:host]
         self.port = opts[:port]
         self.user = opts[:user]
@@ -33,14 +75,8 @@ module InfluxDB
         @conn = Excon.new(get_uri, debug: debug)
       end
 
-      def add_metric(measurement, tags, fields, timestamp=get_now_timestamp)
-        working = measurement.to_s
-        working += ',' + tags.sort.map{|k,v|"#{k.to_s}=#{v.to_s}"}.join(",") if tags.is_a?(Hash)
-        working += ' '
-        working += fields.sort.map{|k,v|"#{k.to_s}=#{if v.is_a?(String);'"'+v+'"';else;v;end}"}.join(",")
-        working += " #{timestamp}"
-        puts "Adding #{working}"
-        @metrics << working
+      def add_metric(*args)
+        @metrics << build_metric(*args)
       end
 
       def write
@@ -65,7 +101,19 @@ module InfluxDB
       end
 
       def metrics
-        @metrics.join("\n")
+        if @metrics.respond_to? :to_a
+          @metrics.join("\n")
+        else
+          @metrics
+        end
+      end
+
+      def metrics= val
+        if val.respond_to?(:to_a) or val.respond_to?(:to_s)
+          @metrics = val
+        else
+          raise OptionError, 'Metrics must implement #to_a or #to_s'
+        end
       end
 
       def host= val
@@ -100,8 +148,9 @@ module InfluxDB
         @retentionPolicy = val
       end
 
+
       def precision= val
-        if %[n u ms s m h].include?(val.to_s)
+        if check_precision val
           @precision = val.to_s
         else
           raise OptionError, 'Precision must be one of (n, u, ms, s, m, h)'
@@ -133,7 +182,7 @@ module InfluxDB
       end
 
       def get_uri
-        if self.ssl
+        if ssl
           uri = "https://"
         else
           uri = "http://"
@@ -144,24 +193,6 @@ module InfluxDB
       def get_headers
         { 'Content-Type' => 'plain/text' }
       end
-
-      def get_now_timestamp
-        case precision
-        when 'n'
-          raise NotSupportedError, 'Nanosecond resolution not currently supported.  Pass timestamp in manually'
-        when 'u'
-          raise NotSupportedError, 'Microsecond resolution not currently supported.  Pass timestamp in manually'
-        when 'ms'
-          ( Time.now.to_f * 1000 ).to_i
-        when 's'
-          Time.now.to_i
-        when 'm'
-          ( Time.now.to_i / 60 ).to_i
-        when 'h'
-          ( Time.now.to_i / 3600 ).to_i
-        end
-      end
-
     end
   end
 end
