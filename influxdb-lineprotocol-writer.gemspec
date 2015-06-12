@@ -8,6 +8,12 @@ Gem::Specification.new do |s|
   s.licenses    = ['MIT']
   s.summary     = "This is a library for the sole purpose of writing one or more datapoints to InfluxDB via the new LineProtocol (https://github.com/influxdb/influxdb/pull/2696)"
   s.description = <<EOF
+This is a very basic gem that provides a library that, via Excon, reliably
+publishes metrics to InfluxDB 0.9.0rc33+ via the LineProtocol Interface.
+
+This is alpha-quality.
+
+I wrote this so that I can integrate it into our Sensu infrastructure easily.
 EOF
   s.authors     = ["Randy D. Wallace Jr."]
   s.email       = 'randy+influxdb-lineprotocol-writer@randywallace.com'
