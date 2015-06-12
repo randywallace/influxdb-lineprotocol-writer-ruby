@@ -50,8 +50,11 @@ module InfluxDB
                        query:   get_query_hash,
                        body:    metrics
                      )
-      rescue Excon::Errors::InternalServerError
-        puts "Internal Server Error: Check InfluxDB logs for error"
+      rescue Excon::Errors::InternalServerError => e
+        puts "Internal Server Error: #{e.response.body}"
+        exit 1
+      rescue Excon::Errors::NotFound => e
+        puts "Not Found: #{e.response.body}"
         exit 1
       rescue Excon::Errors::Timeout
         puts "Connect Timout: #{host}:#{port} unreachable"
