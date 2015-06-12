@@ -52,7 +52,13 @@ module InfluxDB
                      )
       rescue Excon::Errors::InternalServerError
         puts "Internal Server Error: Check InfluxDB logs for error"
-        exit 2
+        exit 1
+      rescue Excon::Errors::Timeout
+        puts "Connect Timout: #{host}:#{port} unreachable"
+        exit 1
+      rescue Excon::Errors::Unauthorized
+        puts "Unauthorized: #{user}/#{pass} not allowed to write to #{db}"
+        exit 1
       end
 
       def metrics
@@ -76,7 +82,11 @@ module InfluxDB
       end
 
       def ssl=  val
-        @ssl = !!val
+        # @ssl = !!val
+        if !!val == true
+          raise NotSupportedError, 'Error: SSL is not currently supported!'
+          exit 1
+        end
       end
 
       def db=   val

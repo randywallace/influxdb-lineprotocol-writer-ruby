@@ -3,12 +3,6 @@ module InfluxDB
     class OptionError < StandardError
     end
 
-    class UnreachableHostError < StandardError
-    end
-
-    class FailedLoginError < StandardError
-    end
-
     class NotSupportedError < StandardError
     end
 
