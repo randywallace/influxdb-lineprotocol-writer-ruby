@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'influxdb-lineprotocol-writer'
 require 'benchmark'
 

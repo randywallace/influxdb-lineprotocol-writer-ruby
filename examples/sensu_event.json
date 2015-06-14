@@ -1,0 +1,28 @@
+{
+  "action": "create",
+  "occurrences": 1,
+  "client": {
+    "name": "vpc-test-server--i-424242",
+    "address": "8.8.8.8",
+    "subscriptions": [
+      "production",
+      "webserver",
+      "mysql"
+    ],
+    "timestamp": 1326390159
+  },
+  "check":{
+    "name": "frontend_http_check",
+    "issued": 1326390169,
+    "subscribers":[
+      "frontend"
+    ],
+    "interval": 60,
+    "status": 2,
+    "handler": "influxdb",
+    "history": [
+      "0",
+      "2"
+    ]
+  }
+}

@@ -23,7 +23,7 @@ module InfluxDB
           false
         end
       end
-      def get_now_timestamp precision
+      def get_now_timestamp precision='ms'
         check_precision precision
         case precision
         when 'n'
@@ -80,6 +80,7 @@ module InfluxDB
       end
 
       def write
+        puts "Writing to InfluxDB at #{get_uri} with params #{get_query_hash} and metrics:\n#{metrics}"
         @conn.request( expects: [204],
                        method:  :post,
                        headers: get_headers,
