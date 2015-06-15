@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    influxdb-lineprotocol-writer (0.1.0)
-      excon (>= 0.45.3)
+    influxdb-lineprotocol-writer (0.2.0)
+      excon (~> 0.45, >= 0.45.3)
 
 GEM
   remote: https://rubygems.org/
@@ -23,4 +23,4 @@ DEPENDENCIES
   influxdb-lineprotocol-writer!
   net-ping
   rake
-  sensu-plugin (>= 1.1.0)
+  sensu-plugin (~> 1.1, >= 1.1.0)
