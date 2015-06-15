@@ -1,50 +1,32 @@
 #!/usr/bin/env ruby
 
-require 'influxdb-lineprotocol-writer'
-require 'sensu-handler'
-require 'json'
+require 'influxdb-lineprotocol-writer/sensu-metric-handler'
 
-module Sensu
-  module InfluxDB
-    class Handler < Sensu::Handler
-      include ::InfluxDB::LineProtocolWriter::Util
+class InfluxDBHandler < ::InfluxDB::LineProtocolWriter::Metric::Handler
 
-      def filter; end
+  def filter; end
 
-      def handle
-        @metrics = []
-        @event['output'].each_line do |line|
-          begin
-            @metrics << JSON.parse(line.chomp).to_h
-          rescue
-            puts "'#{line.chomp}' cannot be parsed"
-          end
-        end
+  def handle
+    metrics, output = split_metrics_from_output
 
-        begin
-          settings = settings['influxdb']
-        rescue
-          settings = {}
-        end
-        settings['host'] = '10.0.1.159'
-        settings['user'] = 'admin'
-        settings['pass'] = 'admin'
-        settings['db'] = 'graphite'
-
-        @metrics.chunk{|i|i["precision"]}.each do |precision_group|
-          settings[:precision] = precision_group[0]
-          settings = Hash[settings.map{|k,v|[k.to_sym,v]}]
-          client = ::InfluxDB::LineProtocolWriter::Core.new settings
-          #client.debug = true
-          client.connect
-          precision_group[1].each do |metric|
-            client.add_metric metric['measurement'], metric['tags'], metric['fields'], metric['precision'], metric['timestamp']
-          end
-          client.write
-
-        end
-
-      end
+    begin
+      settings = settings['influxdb']
+    rescue
+      settings = {}
     end
+    settings['host'] ||= '10.0.1.159'
+    settings['user'] ||= 'admin'
+    settings['pass'] ||= 'admin'
+    settings['db']   ||= 'graphite'
+
+    hostname, instance_id = @event['client']['name'].split('--')
+    write_metrics metrics, settings do |metric|
+      metric['tags']['source'] = hostname
+      metric['tags']['instance_id'] = instance_id unless instance_id.nil?
+    end
+
+    puts output
+
   end
 end
+
