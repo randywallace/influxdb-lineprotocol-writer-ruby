@@ -11,7 +11,7 @@ module InfluxDB
         def split_metrics_from_output
           metrics = []
           output = ''
-          @event['output'].each_line do |line|
+          @event['check']['output'].each_line do |line|
             begin
               metrics << JSON.parse(line.chomp).to_h
             rescue
