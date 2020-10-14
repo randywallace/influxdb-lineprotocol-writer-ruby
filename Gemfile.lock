@@ -11,7 +11,7 @@ GEM
     json (1.8.3)
     mixlib-cli (1.5.0)
     net-ping (1.7.7)
-    rake (10.1.0)
+    rake (12.3.3)
     sensu-plugin (1.1.0)
       json
       mixlib-cli (>= 1.1.0)
